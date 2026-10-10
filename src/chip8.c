@@ -232,7 +232,7 @@ void chip8_op_ANNN(struct chip8 *chip)
 
 void chip8_op_BNNN(struct chip8 *chip)
 {
-  chip->pc = NNN(chip) + chip->regV[0];
+  chip->pc = NNN(chip) + chip->regV[V0];
 }
 
 void chip8_op_CXNN(struct chip8 *chip)
