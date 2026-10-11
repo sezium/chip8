@@ -1,21 +1,15 @@
+# flake.nix
 {
-  description = "CHIP8";
-
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-  outputs =
-    { self, nixpkgs }:
+  outputs = { self, nixpkgs }:
     let
       system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
-    in
-    {
+      pkgs = nixpkgs.legacyPackages.${system};
+    in {
       devShells.${system}.default = pkgs.mkShell {
-        inherit (pkgs.llvmPackages_19) stdenv;
-        buildInputs = [
-          pkgs.SDL2
-        ];
-
+        nativeBuildInputs = with pkgs; [ cmake pkg-config gcc ];
+        buildInputs = with pkgs; [ SDL2 SDL2_mixer ];
       };
     };
 }

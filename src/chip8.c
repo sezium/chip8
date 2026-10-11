@@ -84,7 +84,12 @@ void chip8_load_rom(struct chip8 *chip, const char *restrict path)
   }
 
   fseek(fd, 0, SEEK_SET);
-  assert((fread(chip->mem + CHIP8_MEM_ORG, rom_size, 1, fd) != rom_size));
+
+  if (fread(chip->mem + CHIP8_MEM_ORG, 1, rom_size, fd) != rom_size)
+  {
+    LOG_ERROR("fread: Failed to read ROM");
+    exit(1);
+  }
 
   fclose(fd);
 
@@ -117,101 +122,104 @@ static inline void chip8_skip_instr(struct chip8 *chip)
   chip->pc += 2;
 }
 
-void chip8_op_00E0(struct chip8 *chip)
+
+/* STARTING OPCODE */
+
+static inline void chip8_op_00E0(struct chip8 *chip)
 {
   memset(chip->gfx, 0, sizeof(chip->gfx));
 }
 
-void chip8_op_00EE(struct chip8 *chip)
+static inline void chip8_op_00EE(struct chip8 *chip)
 {
   chip->pc = chip->stack[--chip->sp];
 }
 
-void chip8_op_1NNN(struct chip8 *chip)
+static inline void chip8_op_1NNN(struct chip8 *chip)
 {
   chip->pc = NNN(chip);
 }
 
-void chip8_op_2NNN(struct chip8 *chip)
+static inline void chip8_op_2NNN(struct chip8 *chip)
 {
   chip->stack[chip->sp++] = chip->pc;
   chip->pc = NNN(chip);
 }
 
-void chip8_op_3XNN(struct chip8 *chip)
+static inline void chip8_op_3XNN(struct chip8 *chip)
 {
   if(chip->regV[X(chip)] == NN(chip)) chip8_skip_instr(chip);
 }
 
-void chip8_op_4XNN(struct chip8 *chip)
+static inline void chip8_op_4XNN(struct chip8 *chip)
 {
   if(chip->regV[X(chip)] != NN(chip)) chip8_skip_instr(chip);
 }
 
-void chip8_op_5XY0(struct chip8 *chip)
+static inline void chip8_op_5XY0(struct chip8 *chip)
 {
   if(chip->regV[X(chip)] == chip->regV[Y(chip)]) chip8_skip_instr(chip);
 }
 
-void chip8_op_6XNN(struct chip8 *chip)
+static inline void chip8_op_6XNN(struct chip8 *chip)
 {
   chip->regV[X(chip)] = NN(chip);
 }
 
-void chip8_op_7XNN(struct chip8 *chip)
+static inline void chip8_op_7XNN(struct chip8 *chip)
 {
   chip->regV[X(chip)] += NN(chip);
 }
 
-void chip8_op_8XY0(struct chip8 *chip)
+static inline void chip8_op_8XY0(struct chip8 *chip)
 {
   chip->regV[X(chip)] = chip->regV[Y(chip)];
 }
 
-void chip8_op_8XY1(struct chip8 *chip)
+static inline void chip8_op_8XY1(struct chip8 *chip)
 {
   chip->regV[X(chip)] = chip->regV[X(chip)] | chip->regV[Y(chip)];
 }
 
-void chip8_op_8XY2(struct chip8 *chip)
+static inline void chip8_op_8XY2(struct chip8 *chip)
 {
   chip->regV[X(chip)] = chip->regV[X(chip)] & chip->regV[Y(chip)];
 }
 
-void chip8_op_8XY3(struct chip8 *chip)
+static inline void chip8_op_8XY3(struct chip8 *chip)
 {
   chip->regV[X(chip)] = chip->regV[X(chip)] ^ chip->regV[Y(chip)];
 }
 
-void chip8_op_8XY4(struct chip8 *chip)
+static inline void chip8_op_8XY4(struct chip8 *chip)
 {
   // carry flag 
   chip->regV[VF] = (chip->regV[X(chip)] + chip->regV[Y(chip)]) < chip->regV[X(chip)];
   chip->regV[X(chip)] += chip->regV[Y(chip)];
 }
 
-void chip8_op_8XY5(struct chip8 *chip)
+static inline void chip8_op_8XY5(struct chip8 *chip)
 {
   // carry flag 
   chip->regV[VF] = chip->regV[X(chip)] > chip->regV[Y(chip)];
   chip->regV[X(chip)] -= chip->regV[Y(chip)];
 }
 
-void chip8_op_8XY6(struct chip8 *chip)
+static inline void chip8_op_8XY6(struct chip8 *chip)
 {
   // carry flag 
   chip->regV[VF] = chip->regV[X(chip)] & 1;
   chip->regV[X(chip)] >>= 1;
 }
 
-void chip8_op_8XY7(struct chip8 *chip)
+static inline void chip8_op_8XY7(struct chip8 *chip)
 {
   // carry flag 
   chip->regV[VF] = chip->regV[Y(chip)] > chip->regV[X(chip)];
   chip->regV[X(chip)] = chip->regV[Y(chip)] - chip->regV[X(chip)];
 }
 
-void chip8_op_8XYE(struct chip8 *chip)
+static inline void chip8_op_8XYE(struct chip8 *chip)
 {
   // carry flag 
   // if MSB is 1 then
@@ -220,27 +228,27 @@ void chip8_op_8XYE(struct chip8 *chip)
 
 }
 
-void chip8_op_9XY0(struct chip8 *chip)
+static inline void chip8_op_9XY0(struct chip8 *chip)
 {
   if(chip->regV[X(chip)] != chip->regV[Y(chip)]) chip8_skip_instr(chip);
 }
 
-void chip8_op_ANNN(struct chip8 *chip)
+static inline void chip8_op_ANNN(struct chip8 *chip)
 {
   chip->I = NNN(chip);
 }
 
-void chip8_op_BNNN(struct chip8 *chip)
+static inline void chip8_op_BNNN(struct chip8 *chip)
 {
   chip->pc = NNN(chip) + chip->regV[V0];
 }
 
-void chip8_op_CXNN(struct chip8 *chip)
+static inline void chip8_op_CXNN(struct chip8 *chip)
 {
   chip->regV[X(chip)] = (rand() & 255) & NN(chip);
 }
 
-void chip8_op_DXYN(struct chip8 *chip)
+static inline void chip8_op_DXYN(struct chip8 *chip)
 {
   chip8_t height = N(chip);
 
@@ -276,22 +284,22 @@ void chip8_op_DXYN(struct chip8 *chip)
 }
 
 
-void chip8_op_EX9E(struct chip8 *chip)
+static inline void chip8_op_EX9E(struct chip8 *chip)
 {
   if(chip->key[X(chip)]) chip8_skip_instr(chip);
 }
 
-void chip8_op_EXA1(struct chip8 *chip)
+static inline void chip8_op_EXA1(struct chip8 *chip)
 {
   if(!chip->key[X(chip)]) chip8_skip_instr(chip);
 }
 
-void chip8_op_FX07(struct chip8 *chip)
+static inline void chip8_op_FX07(struct chip8 *chip)
 {
   chip->regV[X(chip)] = chip->delay;
 }
 
-void chip8_op_FX0A(struct chip8 *chip)
+static inline void chip8_op_FX0A(struct chip8 *chip)
 {
   for(size_t i = 0; i < CHIP8_KEY_SIZE; i++)
   {
@@ -306,27 +314,27 @@ void chip8_op_FX0A(struct chip8 *chip)
   chip->pc -= 2;
 }
 
-void chip8_op_FX15(struct chip8 *chip)
+static inline void chip8_op_FX15(struct chip8 *chip)
 {
   chip->delay = chip->regV[X(chip)];
 }
 
-void chip8_op_FX18(struct chip8 *chip)
+static inline void chip8_op_FX18(struct chip8 *chip)
 {
   chip->sound = chip->regV[X(chip)];
 }
 
-void chip8_op_FX1E(struct chip8 *chip)
+static inline void chip8_op_FX1E(struct chip8 *chip)
 {
   chip->I += chip->regV[X(chip)];
 }
 
-void chip8_op_FX29(struct chip8 *chip)
+static inline void chip8_op_FX29(struct chip8 *chip)
 {
   chip->I = CHIP8_FONT_ORG + chip->regV[X(chip)] * 5;
 }
 
-void chip8_op_FX33(struct chip8 *chip)
+static inline void chip8_op_FX33(struct chip8 *chip)
 {
   chip8_t vX = chip->regV[X(chip)];
   chip->mem[chip->I + 2] = vX % 10;
@@ -336,7 +344,7 @@ void chip8_op_FX33(struct chip8 *chip)
   chip->mem[chip->I + 0] = vX % 10;
 }
 
-void chip8_op_FX55(struct chip8 *chip)
+static inline void chip8_op_FX55(struct chip8 *chip)
 {
   for(size_t i = 0; i <= X(chip); i++)
   {
@@ -345,7 +353,7 @@ void chip8_op_FX55(struct chip8 *chip)
 
 }
 
-void chip8_op_FX65(struct chip8 *chip)
+static inline void chip8_op_FX65(struct chip8 *chip)
 {
   for(size_t i = 0; i <= X(chip); i++)
   {
@@ -389,7 +397,7 @@ static void (*chip8_op_F_table[256])(struct chip8 *chip) = {
 };
 
 
-void chip8_op_E(struct chip8 *chip)
+static inline void chip8_op_E(struct chip8 *chip)
 {
   void (*op)(struct chip8 *) = chip8_op_E_table[NN(chip)];
 
@@ -402,7 +410,7 @@ void chip8_op_E(struct chip8 *chip)
   op(chip);
 }
 
-void chip8_op_F(struct chip8 *chip)
+static inline void chip8_op_F(struct chip8 *chip)
 {
   void (*op)(struct chip8 *) = chip8_op_F_table[NN(chip)];
 
@@ -415,7 +423,7 @@ void chip8_op_F(struct chip8 *chip)
   op(chip);
 }
 
-void chip8_op_8(struct chip8 *chip)
+static inline void chip8_op_8(struct chip8 *chip)
 {
   void (*op)(struct chip8 *) = chip8_op_8_table[N(chip)];
 
@@ -428,7 +436,7 @@ void chip8_op_8(struct chip8 *chip)
   op(chip);
 }
 
-void chip8_op_0(struct chip8 *chip) 
+static inline void chip8_op_0(struct chip8 *chip) 
 {
   void (*op)(struct chip8 *) = chip8_op_0_table[NN(chip)];
 
@@ -443,7 +451,8 @@ void chip8_op_0(struct chip8 *chip)
 
 }
 
-static void (*chip8_op_table[16])(struct chip8 *chip) = {
+static void (*chip8_op_table[16])(struct chip8 *chip) = 
+{
   [0x0] = chip8_op_0,
   [0x1] = chip8_op_1NNN,
   [0x2] = chip8_op_2NNN,
@@ -462,6 +471,16 @@ static void (*chip8_op_table[16])(struct chip8 *chip) = {
   [0xF] = chip8_op_F
 };
 
+
+void chip8_update_timers(struct chip8 *chip) 
+{
+  if (chip->delay > 0)
+    chip->delay--;
+
+  if (chip->sound > 0)
+    chip->sound--;
+
+}
 
 
 void chip8_cycle(struct chip8 *chip)
@@ -489,10 +508,5 @@ void chip8_cycle(struct chip8 *chip)
 
   op(chip);
 
-  if (chip->delay > 0)
-    chip->delay--;
-
-  if (chip->sound > 0)
-    chip->sound--;
 
 }
