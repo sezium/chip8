@@ -14,7 +14,7 @@ typedef unsigned int   chip8_mem_t;
 #define CHIP8_DISPLAY_WIDTH  64
 #define CHIP8_DISPLAY_HEIGHT 32
 #define CHIP8_DISPLAY_SIZE   ((CHIP8_DISPLAY_WIDTH) * (CHIP8_DISPLAY_HEIGHT))
-#define CHIP8_DISPLAY_SCALE  32
+#define CHIP8_DISPLAY_SCALE  8
 
 #define CHIP8_HZ             500                           // HZ of the CHIP8
 #define CHIP8_PERIOD         ((1 * 1000) / CHIP8_HZ)       // ogni 2 ms fai un ciclo. * 1000 = ms
