@@ -31,6 +31,7 @@ struct chip8* chip8_init(void)
   chip->delay = 0;
   chip->sound = 0;
   chip->running = 0;
+  chip->draw = 0;
 
   srand(time(0));
 
@@ -128,6 +129,7 @@ static inline void chip8_skip_instr(struct chip8 *chip)
 static inline void chip8_op_00E0(struct chip8 *chip)
 {
   memset(chip->gfx, 0, sizeof(chip->gfx));
+  chip->draw = 1;
 }
 
 static inline void chip8_op_00EE(struct chip8 *chip)
@@ -281,6 +283,8 @@ static inline void chip8_op_DXYN(struct chip8 *chip)
       
     }
   }
+
+  chip->draw = 1;
 }
 
 

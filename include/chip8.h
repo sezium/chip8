@@ -14,10 +14,13 @@ typedef unsigned int   chip8_mem_t;
 #define CHIP8_DISPLAY_WIDTH  64
 #define CHIP8_DISPLAY_HEIGHT 32
 #define CHIP8_DISPLAY_SIZE   ((CHIP8_DISPLAY_WIDTH) * (CHIP8_DISPLAY_HEIGHT))
-#define CHIP8_DISPLAY_SCALE  (4)
+#define CHIP8_DISPLAY_SCALE  32
 
-#define CHIP8_OP_PER_SEC     (500)             // op per seconds
-#define CHIP8_OP_TIME_MS    ((1 * 1000) / CHIP8_OP_PER_SEC) // ogni 2 ms fai un ciclo. * 1000 = ms
+#define CHIP8_HZ             500                           // HZ of the CHIP8
+#define CHIP8_PERIOD         ((1 * 1000) / CHIP8_HZ)       // ogni 2 ms fai un ciclo. * 1000 = ms
+
+#define CHIP8_SOUND_HZ       60                            // HZ of the CHIP8
+#define CHIP8_SOUND_PERIOD   ((1 * 1000) / CHIP8_SOUND_HZ) // ogni 2 ms fai un ciclo. * 1000 = ms
 
 #define CHIP8_FOREGROUND_COLOR 0xFFFFFF
 #define CHIP8_BACKGROUND_COLOR 0x000000
@@ -62,6 +65,7 @@ struct chip8
   chip8_t sound;
 
   unsigned char running;
+  unsigned char draw;
 
 };
 
