@@ -8,27 +8,27 @@ static void process_input(struct chip8 *chip)
 {
   SDL_Event event;
 
-  while (SDL_PollEvent(&event))
+  while(SDL_PollEvent(&event))
   {
-    if (event.type == SDL_QUIT)
+    if(event.type == SDL_QUIT)
     {
       chip->running = 0;
       continue;
     }
 
-    if (event.type != SDL_KEYDOWN && event.type != SDL_KEYUP)
+    if(event.type != SDL_KEYDOWN && event.type != SDL_KEYUP)
       continue;
 
     unsigned char pressed = event.type == SDL_KEYDOWN;
     SDL_Keycode key = event.key.keysym.sym;
 
-    if (key == SDLK_ESCAPE && pressed)
+    if(key == SDLK_ESCAPE && pressed)
     {
       chip->running = 0;
       continue;
     }
 
-    switch (key)
+    switch(key)
     {
       case SDLK_1: chip->key[0x1] = pressed; break;
       case SDLK_2: chip->key[0x2] = pressed; break;
@@ -56,12 +56,12 @@ static void process_input(struct chip8 *chip)
 static void update_framebuffer(SDL_Surface *framebuffer,
                                const struct chip8 *chip)
 {
-  if (SDL_LockSurface(framebuffer) < 0)
+  if(SDL_LockSurface(framebuffer) < 0)
     return;
 
   chip8_mem_t *pixels = framebuffer->pixels;
 
-  for (uint32_t i = 0; i < CHIP8_DISPLAY_SIZE; i++)
+  for(uint32_t i = 0; i < CHIP8_DISPLAY_SIZE; i++)
   {
     const uint32_t color = chip->gfx[i]
       ? CHIP8_FOREGROUND_COLOR
@@ -69,8 +69,8 @@ static void update_framebuffer(SDL_Surface *framebuffer,
 
       pixels[i] = SDL_MapRGBA(
         framebuffer->format,
-        (color >> 16) & 0xFF,
-        (color >> 8)  & 0xFF,
+       (color >> 16) & 0xFF,
+       (color >> 8)  & 0xFF,
         color         & 0xFF,
         0xFF
     );
@@ -81,13 +81,13 @@ static void update_framebuffer(SDL_Surface *framebuffer,
 
 int main(int argc, char *argv[])
 {
-  if (argc != 2)
+  if(argc != 2)
   {
     LOG_INFO_ARGS("USAGE: %s <ROM.C8>", argv[0]);
     return 1;
   }
 
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+  if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
   {
     LOG_ERROR_ARGS("SDL_Init failed: %s", SDL_GetError());
     return 1;
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
       SDL_WINDOW_SHOWN
       );
 
-  if (window == NULL)
+  if(window == NULL)
   {
     LOG_ERROR_ARGS("SDL_CreateWindow failed: %s", SDL_GetError());
     SDL_Quit();
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
       window, -1, SDL_RENDERER_ACCELERATED
       );
 
-  if (renderer == NULL)
+  if(renderer == NULL)
   {
     LOG_INFO_ARGS("Accelerated renderer unavailable: %s",
         SDL_GetError());
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
         );
   }
 
-  if (renderer == NULL)
+  if(renderer == NULL)
   {
     LOG_ERROR_ARGS("SDL_CreateRenderer failed: %s", SDL_GetError());
     SDL_DestroyWindow(window);
@@ -153,14 +153,14 @@ int main(int argc, char *argv[])
       SDL_PIXELFORMAT_RGBA32
       );
 
-  if (texture == NULL || framebuffer == NULL)
+  if(texture == NULL || framebuffer == NULL)
   {
     LOG_ERROR_ARGS("Framebuffer creation failed: %s", SDL_GetError());
 
-    if (framebuffer != NULL)
+    if(framebuffer != NULL)
       SDL_FreeSurface(framebuffer);
 
-    if (texture != NULL)
+    if(texture != NULL)
       SDL_DestroyTexture(texture);
 
     SDL_DestroyRenderer(renderer);
@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
   chip8_load_rom(chip, argv[1]);
   chip->running = 1;
 
-  if (Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 2048) < 0)
+  if(Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 2048) < 0)
   {
     LOG_ERROR_ARGS("Mix_OpenAudio failed: %s", Mix_GetError());
     chip8_free(chip);
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
 
   Mix_Chunk *beep = Mix_LoadWAV("beep.wav");
 
-  if (beep == NULL)
+  if(beep == NULL)
   {
     LOG_ERROR_ARGS("Mix_LoadWAV failed: %s", Mix_GetError());
     Mix_CloseAudio();
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
   uint32_t timer_accumulator = 0;
   int beep_channel = -1;
 
-  while (chip->running)
+  while(chip->running)
   {
     process_input(chip);
 
@@ -217,36 +217,36 @@ int main(int argc, char *argv[])
     cycle_accumulator += delta;
     timer_accumulator += delta;
 
-    while (timer_accumulator >= CHIP8_SOUND_PERIOD)
+    while(timer_accumulator >= CHIP8_SOUND_PERIOD)
     {
       timer_accumulator -= CHIP8_SOUND_PERIOD;
       chip8_update_timers(chip);
 
-      if (chip->sound > 0)
+      if(chip->sound > 0)
       {
-        if (beep_channel == -1 || !Mix_Playing(beep_channel))
+        if(beep_channel == -1 || !Mix_Playing(beep_channel))
         {
           beep_channel = Mix_PlayChannel(-1, beep, -1);
 
-          if (beep_channel < 0)
+          if(beep_channel < 0)
             LOG_ERROR_ARGS("Mix_PlayChannel failed: %s",
                 Mix_GetError());
         }
       }
-      else if (beep_channel != -1)
+      else if(beep_channel != -1)
       {
         Mix_HaltChannel(beep_channel);
         beep_channel = -1;
       }
     }
 
-    while (cycle_accumulator >= CHIP8_PERIOD)
+    while(cycle_accumulator >= CHIP8_PERIOD)
     {
       cycle_accumulator -= CHIP8_PERIOD;
       chip8_cycle(chip);
     }
 
-    if (chip->draw)
+    if(chip->draw)
     {
       chip->draw = 0;
 
