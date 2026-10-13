@@ -53,4 +53,6 @@ Run the emulator with a ROM:
 
 You can load any compatible CHIP-8 ROM by passing its path as a command-line argument.
 
-## Demo
+## Preview
+
+https://github.com/user-attachments/assets/e030279a-a15b-4794-87c1-5a15ef11fd6a
