@@ -59,7 +59,7 @@ static void update_framebuffer(SDL_Surface *framebuffer,
   if(SDL_LockSurface(framebuffer) < 0)
     return;
 
-  chip8_mem_t *pixels = framebuffer->pixels;
+  uint32_t *pixels = framebuffer->pixels;
 
   for(uint32_t i = 0; i < CHIP8_DISPLAY_SIZE; i++)
   {
