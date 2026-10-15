@@ -290,12 +290,12 @@ static inline void chip8_op_DXYN(struct chip8 *chip)
 
 static inline void chip8_op_EX9E(struct chip8 *chip)
 {
-  if(chip->key[X(chip)]) chip8_skip_instr(chip);
+  if(chip->key[chip->regV[X(chip)]]) chip8_skip_instr(chip);
 }
 
 static inline void chip8_op_EXA1(struct chip8 *chip)
 {
-  if(!chip->key[X(chip)]) chip8_skip_instr(chip);
+  if(!chip->key[chip->regV[X(chip)]]) chip8_skip_instr(chip);
 }
 
 static inline void chip8_op_FX07(struct chip8 *chip)
