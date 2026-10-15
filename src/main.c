@@ -89,7 +89,7 @@ static void chip8_window_update_framebuffer(SDL_Surface *framebuffer,
         framebuffer->format,
        (color >> 16) & 0xFF,
        (color >> 8)  & 0xFF,
-        color         & 0xFF,
+        color        & 0xFF,
         0xFF
     );
   }
@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
 {
   if(argc != 2)
   {
-    LOG_INFO_ARGS("USAGE: %s <ROM.C8>", argv[0]);
+    LOG_INFO_ARGS("Usage: %s <rom.ch8>", argv[0]);
     return 1;
   }
 
